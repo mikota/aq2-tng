@@ -2454,6 +2454,15 @@ void PutClientInServer(edict_t * ent)
 	ent->s.skinnum = ent - g_edicts - 1;
 	ent->s.modelindex = 255;	// will use the skin specified model
 
+	// SPAQ
+	if (true_hitbox->value)
+	{
+	// SPAQ
+		Col_SetModel(ent, NULL, "players/male/tris.md2");
+	// SPAQ
+	}
+	// SPAQ
+
 	// zucc vwep
 	//ent->s.modelindex2 = 255;             // custom gun model
 	ShowGun(ent);
