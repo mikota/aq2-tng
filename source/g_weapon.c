@@ -208,7 +208,7 @@ static void fire_lead (edict_t *self, vec3_t start, vec3_t aimdir, int damage, i
 			else
 			{
 				if (mod != MOD_M3 && mod != MOD_HC) {
-					AddDecal(self, &tr);
+					AddDecal(self, &tr.tr);
 				}
 
 				if (strncmp(tr.tr.surface->name, "sky", 3) != 0)
@@ -431,7 +431,7 @@ static void fire_lead_ap(edict_t *self, vec3_t start, vec3_t aimdir, int damage,
 			{
 				if (strncmp(tr.tr.surface->name, "sky", 3) != 0)
 				{
-					AddDecal(self, &tr);
+					AddDecal(self, &tr.tr);
 					gi.WriteByte(svc_temp_entity);
 					gi.WriteByte(te_impact);
 					gi.WritePosition (tr.tr.endpos);
