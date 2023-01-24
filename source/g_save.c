@@ -570,7 +570,7 @@ void InitGame( void )
   	g_spawn_items = gi.cvar("g_spawn_items", "0", CVAR_LATCH);
 
 	// 2023
-	true_hitbox = gi.cvar("true_hitbox", "0", 0);
+	true_hitbox = gi.cvar("true_hitbox", "0", CVAR_LATCH);
 
 	// Discord SDK integration with Q2Pro
 	cl_discord = gi.cvar("cl_discord", "0", 0);
