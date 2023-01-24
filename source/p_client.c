@@ -2455,11 +2455,10 @@ void PutClientInServer(edict_t * ent)
 	ent->s.modelindex = 255;	// will use the skin specified model
 
 	// SPAQ
+	// TODO: Make this load all player models from AQtion distrib
 	if (true_hitbox->value)
 	{
-	// SPAQ
 		Col_SetModel(ent, NULL, "players/male/tris.md2");
-	// SPAQ
 	}
 	// SPAQ
 
