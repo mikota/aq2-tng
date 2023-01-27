@@ -169,8 +169,11 @@ static g_collision_data_t *Col_Load(const char *filename)
 
 	FILE *fp = fopen(name, "rb");
 
-	if (!fp)
+	if (!fp) {
+		gi.dprintf("Disabling true_hitbox - File not found: %s.\n", filename);
+		gi.cvar_forceset("true_hitbox", "0");
 		return NULL;
+	}
 
 	dmd2header_t header;
 	fread(&header, sizeof(header), 1, fp);

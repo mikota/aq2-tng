@@ -1212,6 +1212,7 @@ extern cvar_t *gmf; // Gamemodeflags
 extern cvar_t *sv_idleremove; // Remove idlers
 
 // 2023
+extern cvar_t *experimental; // Gate for experimental features
 extern cvar_t *true_hitbox; // Paril's SPAQ collision code
 
 // Discord SDK integration with Q2Pro
