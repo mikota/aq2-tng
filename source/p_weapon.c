@@ -620,7 +620,8 @@ Use_Weapon(edict_t* ent, gitem_t* item)
 
 
 
-edict_t *FindSpecWeapSpawn(edict_t* ent)
+edict_t*
+FindSpecWeapSpawn(edict_t* ent)
 {
 	edict_t* spot = NULL;
 
@@ -642,7 +643,8 @@ edict_t *FindSpecWeapSpawn(edict_t* ent)
 	return spot;
 }
 
-static void SpawnSpecWeap(gitem_t* item, edict_t* spot)
+static void
+SpawnSpecWeap(gitem_t* item, edict_t* spot)
 {
 	/*        edict_t *ent;
 			vec3_t  forward, right;
@@ -681,61 +683,41 @@ static void SpawnSpecWeap(gitem_t* item, edict_t* spot)
 	gi.linkentity(spot);
 }
 
-void SpecialWeaponRespawnTimer(edict_t* ent)
+void temp_think_specweap(edict_t* ent)
 {
 	ent->touch = Touch_Item;
 
-	/*
-	G_FreeEdict frees the weapon after the nextthink timer expires
-	Placeholder is used to keep the weapon around for a very long time
-	ThinkSpecWeap is used to respawn the weapon at a different spawn point
-	*/
-
-	// Allweapon setting makes dropped weapons disappear in 1s
 	if (allweapon->value) { // allweapon set
-		ent->nextthink = eztimer(1);
+		ent->nextthink = level.framenum + 1 * HZ;
 		ent->think = G_FreeEdict;
 		return;
 	}
-	// Removes weapons more often during warmup (10s)
-	if (in_warmup) {
-		ent->nextthink = eztimer(10);
-		ent->think = G_FreeEdict;
-		return;
-	}
-	// Espionage, CTF and Domination weapons disappear after 30s
-	if (esp->value || dom->value || ctf->value) {
-		ent->nextthink = eztimer(30);
-		ent->think = G_FreeEdict;
-		return;
-	}
-	// Normal teamplay, weapons basically never disappear
+
 	if (gameSettings & GS_ROUNDBASED) {
-		ent->nextthink = eztimer(1000);
+		ent->nextthink = level.framenum + 1000 * HZ;
 		ent->think = PlaceHolder;
 		return;
 	}
-	// Deathmatch with weapon choose, weapons disappear in 6s
+
 	if (gameSettings & GS_WEAPONCHOOSE) {
-		ent->nextthink = eztimer(6);
+		ent->nextthink = level.framenum + 6 * HZ;
 		ent->think = ThinkSpecWeap;
-		return;
 	}
-	// unless weapon respawn dmflag is set, then use the weapon_respawn cvar
 	else if (DMFLAGS(DF_WEAPON_RESPAWN)) {
 		ent->nextthink = level.framenum + (weapon_respawn->value * 0.6f) * HZ;
 		ent->think = G_FreeEdict;
-		return;
 	}
-	// Catch-all, should just remove weapons after weapon_respawn setting
-	// and then indicate that the weapon should respawn at its set spawn point
-	ent->nextthink = level.framenum + eztimer((int)weapon_respawn->value / 10) * HZ;
-	ent->think = ThinkSpecWeap;
-	return;
+	else {
+		ent->nextthink = level.framenum + weapon_respawn->value * HZ;
+		ent->think = ThinkSpecWeap;
+	}
 }
 
+
+
 // zucc make dropped weapons respawn elsewhere
-void ThinkSpecWeap(edict_t* ent)
+void
+ThinkSpecWeap(edict_t* ent)
 {
 	edict_t* spot;
 
@@ -746,7 +728,7 @@ void ThinkSpecWeap(edict_t* ent)
 	}
 	else
 	{
-		ent->nextthink = eztimer(1);
+		ent->nextthink = level.framenum + 1 * HZ;
 		ent->think = G_FreeEdict;
 	}
 }
@@ -808,7 +790,7 @@ void Drop_Weapon(edict_t* ent, gitem_t* item)
 		}
 		ent->client->unique_weapon_total--;	// dropping 1 unique weapon
 		temp = Drop_Item(ent, item);
-		temp->think = SpecialWeaponRespawnTimer;
+		temp->think = temp_think_specweap;
 		ent->client->inventory[index]--;
 	}
 	else if (item->typeNum == M4_NUM)
@@ -825,7 +807,7 @@ void Drop_Weapon(edict_t* ent, gitem_t* item)
 		}
 		ent->client->unique_weapon_total--;	// dropping 1 unique weapon
 		temp = Drop_Item(ent, item);
-		temp->think = SpecialWeaponRespawnTimer;
+		temp->think = temp_think_specweap;
 		ent->client->inventory[index]--;
 	}
 	else if (item->typeNum == M3_NUM)
@@ -841,7 +823,7 @@ void Drop_Weapon(edict_t* ent, gitem_t* item)
 		}
 		ent->client->unique_weapon_total--;	// dropping 1 unique weapon
 		temp = Drop_Item(ent, item);
-		temp->think = SpecialWeaponRespawnTimer;
+		temp->think = temp_think_specweap;
 		ent->client->inventory[index]--;
 	}
 	else if (item->typeNum == HC_NUM)
@@ -856,7 +838,7 @@ void Drop_Weapon(edict_t* ent, gitem_t* item)
 		}
 		ent->client->unique_weapon_total--;	// dropping 1 unique weapon
 		temp = Drop_Item(ent, item);
-		temp->think = SpecialWeaponRespawnTimer;
+		temp->think = temp_think_specweap;
 		ent->client->inventory[index]--;
 	}
 	else if (item->typeNum == SNIPER_NUM)
@@ -874,7 +856,7 @@ void Drop_Weapon(edict_t* ent, gitem_t* item)
 		}
 		ent->client->unique_weapon_total--;	// dropping 1 unique weapon
 		temp = Drop_Item(ent, item);
-		temp->think = SpecialWeaponRespawnTimer;
+		temp->think = temp_think_specweap;
 		ent->client->inventory[index]--;
 	}
 	else if (item->typeNum == DUAL_NUM)
@@ -1467,10 +1449,7 @@ Weapon_Generic(edict_t* ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 		if (ent->client->ps.gunframe == FRAME_DEACTIVATE_LAST)
 		{
 			ent->client->weaponstate = WEAPON_BUSY;
-			if (esp->value && esp_leaderenhance->value && IS_LEADER(ent))
-				ent->client->idle_weapon = ENHANCED_BANDAGE_TIME;
-			else
-				ent->client->idle_weapon = BANDAGE_TIME;
+			ent->client->idle_weapon = BANDAGE_TIME;
 			return;
 		}
 		ent->client->ps.gunframe++;
@@ -2071,15 +2050,10 @@ int AdjustSpread(edict_t* ent, int spread)
 	if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)	// crouching
 		return (spread * .65);
 
-	if (INV_AMMO(ent, LASER_NUM) &&
-		(ent->client->curr_weap == MK23_NUM ||
-		ent->client->curr_weap == MP5_NUM ||
-		ent->client->curr_weap == M4_NUM))
+	if (INV_AMMO(ent, LASER_NUM) && (ent->client->curr_weap == MK23_NUM
+		|| ent->client->curr_weap == MP5_NUM || ent->client->curr_weap == M4_NUM))
 		laser = 1;
 
-	// Include the Dual MK23 pistol if enabled
-	if (gun_dualmk23_enhance->value && (INV_AMMO(ent, LASER_NUM)) && (ent->client->curr_weap == DUAL_NUM))
-		laser = 1;
 
 	// running
 	if (xyspeed > running* running)
@@ -2412,7 +2386,12 @@ void M4_Fire(edict_t* ent)
 	int damage = 90;
 	int kick = 90;
 	vec3_t offset;
-	int spread = M4_SPREAD;
+	int spread = M4_SPREAD/8;
+    int adjusted_mg_shots = ent->client->machinegun_shots;
+    if (ent->client->machinegun_shots > 9) {
+        adjusted_mg_shots = 9;
+    }
+    spread += adjusted_mg_shots * 22;
 	int height;
 
 	if (ent->client->pers.firing_style == ACTION_FIRING_CLASSIC)
@@ -2481,7 +2460,6 @@ void M4_Fire(edict_t* ent)
 
 	//      gi.cprintf(ent, PRINT_HIGH, "Spread is %d\n", spread);
 
-
 	//Calculate the kick angles
 	for (i = 1; i < 3; i++)
 	{
@@ -2490,13 +2468,16 @@ void M4_Fire(edict_t* ent)
 	}
 	ent->client->kick_origin[0] = crandom() * 0.35;
 	ent->client->kick_angles[0] = ent->client->machinegun_shots * -.7;
-
+    float kickangle_aim_offset = 0.25;
+    ent->client->kick_angles[0] += kickangle_aim_offset;
 	// get start / end positions
-	VectorAdd(ent->client->v_angle, ent->client->kick_angles, angles);
+    VectorCopy(ent->client->kick_angles, angles);
+    VectorScale(angles, 1.05f, angles);
+	VectorAdd(ent->client->v_angle, angles, angles);
 	AngleVectors(angles, forward, right, NULL);
 	VectorSet(offset, 0, 8, ent->viewheight - height);
 	P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
-
+    ent->client->kick_angles[0] -= kickangle_aim_offset;
 	if (is_quad)
 		damage *= 1.5f;
 
@@ -2943,8 +2924,6 @@ void Dual_Fire(edict_t* ent)
 
 
 			ent->client->weapon_sound = MZ_BLASTER2;  // Becomes MZ_BLASTER.
-			if (gun_dualmk23_enhance->value && INV_AMMO(ent, SIL_NUM))
-				ent->client->weapon_sound |= MZ_SILENCED;
 			PlayWeaponSound(ent);
 		}
 		else
@@ -3017,8 +2996,6 @@ void Dual_Fire(edict_t* ent)
 
 
 	ent->client->weapon_sound = MZ_BLASTER2;  // Becomes MZ_BLASTER.
-	if (gun_dualmk23_enhance->value && INV_AMMO(ent, SIL_NUM))
-		ent->client->weapon_sound |= MZ_SILENCED;
 	PlayWeaponSound(ent);
 }
 
@@ -3216,10 +3193,7 @@ Weapon_Generic_Knife(edict_t* ent, int FRAME_ACTIVATE_LAST,
 		if (ent->client->ps.gunframe == FRAME_DEACTIVATE_LAST)
 		{
 			ent->client->weaponstate = WEAPON_BUSY;
-			if (esp->value && esp_leaderenhance->value && IS_LEADER(ent))
-				ent->client->idle_weapon = ENHANCED_BANDAGE_TIME;
-			else
-				ent->client->idle_weapon = BANDAGE_TIME;
+			ent->client->idle_weapon = BANDAGE_TIME;
 			return;
 		}
 		ent->client->ps.gunframe++;
@@ -3714,10 +3688,7 @@ void Weapon_Gas(edict_t* ent)
 		if (ent->client->ps.gunframe == 0)
 		{
 			ent->client->weaponstate = WEAPON_BUSY;
-			if (esp->value && esp_leaderenhance->value && IS_LEADER(ent))
-				ent->client->idle_weapon = ENHANCED_BANDAGE_TIME;
-			else
-				ent->client->idle_weapon = BANDAGE_TIME;
+			ent->client->idle_weapon = BANDAGE_TIME;
 			return;
 		}
 		ent->client->ps.gunframe--;
