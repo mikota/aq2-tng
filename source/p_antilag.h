@@ -25,7 +25,6 @@ extern cvar_t *sv_antilag_interp;
 void antilag_update(edict_t *ent);
 void antilag_rewind_all(edict_t *ent);
 void antilag_unmove_all(void);
-
-
+int antilag_pingxerp_calc_amt(int ping, int lower_bound, int upper_bound);
 
 
