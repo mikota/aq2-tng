@@ -495,11 +495,18 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
             //the "point" variable is the point of impact on the bounding box, we need to extend it
             //in the direction of the shot to see if it is within the cylinder
             //we also adjust the radius to be smaller if client is moving;
-            float radius = 12.0f;
-            float radius_reduction = VectorLength(client->ps.pmove.velocity)/(8 * 150);
+            float radius = 13.25f;
+            float radius_reduction = VectorLength(client->ps.pmove.velocity)/(8 * 450);
+            if (mod == MOD_SNIPER)
+                radius_reduction *= 1.65; //if shooting with sniper, you need to be more accurate
+            if (mod == MOD_MK23)
+                radius_reduction *= 0.875;
+            if (client->curr_weap != SNIPER_NUM)
+                radius_reduction *= 1.55; //if holding sniper, you already get the advantage of full moving accuracy, dont need the extra reduction
             radius -= radius_reduction;
             if (radius < 8.0f)
                 radius = 8.0f;
+            //Com_Printf("radius: %f\n", radius);
             //first though, we check if original point is within the cylinder, too
             if (!IsPointInCircle(point[0], point[1], targ->s.origin[0], targ->s.origin[1], radius))
             {
@@ -545,8 +552,8 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
 				//gi.cprintf(attacker, PRINT_HIGH, "z: %d y: %d x: %d\n", (int)(targ_maxs2 - new_point[2]),(int)(new_point[1]) , (int)(new_point[0]) );
 
 				if ((targ_maxs2 - new_point[2]) < HEAD_HEIGHT
-					&& (abs (new_point[1])) < HEAD_HEIGHT * .575
-					&& (abs (new_point[0])) < HEAD_HEIGHT * .575)
+					&& (abs (new_point[1])) < HEAD_HEIGHT * .6
+					&& (abs (new_point[0])) < HEAD_HEIGHT * .6)
 				{
 					head_success = 1;
 				}

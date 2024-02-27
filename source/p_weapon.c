@@ -2049,9 +2049,9 @@ void weapon_grenade_fire(edict_t* ent, qboolean held)
 	ent->client->grenade_framenum = level.framenum + 1 * HZ;
 }
 
-#define MK23_SPREAD		28
+#define MK23_SPREAD		20
 #define MP5_SPREAD		250 // DW: Changed this back to original from Edition's 240
-#define M4_SPREAD		55
+#define M4_SPREAD		32
 #define SNIPER_SPREAD 425
 #define DUAL_SPREAD   120 // DW: Changed this back to original from Edition's 275
 
@@ -2248,12 +2248,19 @@ void Pistol_Fire(edict_t* ent)
 	//Calculate the kick angles
 	for (i = 1; i < 3; i++)
 	{
-		ent->client->kick_origin[i] = crandom() * 0.35;
-		ent->client->kick_angles[i] = crandom() * 0.7;
+		ent->client->kick_origin[i] = crandom() * 0.2;
+		ent->client->kick_angles[i] = crandom() * 0.5;
 	}
-	ent->client->kick_origin[0] = crandom() * 0.35;
-	ent->client->kick_angles[0] = ent->client->machinegun_shots * -1.5;
-
+	ent->client->kick_origin[0] = crandom() * 0.15;
+	ent->client->kick_angles[0] = crandom() * 0.2;
+    if (!ent->client->pers.mk23_mode) {
+        for (int i=0; i<3; i++) {
+            float* k_origin = &ent->client->kick_origin[i];
+            float* k_angles = &ent->client->kick_angles[i];
+            if (*k_origin < 0.1) *k_origin *= 2;
+            if (*k_angles < 0.1) *k_angles *= 2;
+        }
+    }
 	// get start / end positions
 	VectorAdd(ent->client->v_angle, ent->client->kick_angles, angles);
 	AngleVectors(angles, forward, right, NULL);
@@ -3031,6 +3038,12 @@ void Dual_Fire(edict_t* ent)
 		ent->client->kick_angles[i] = crandom() * 0.5;
 	}
 	ent->client->kick_origin[0] = crandom() * 0.35;
+    for (int i=0; i<3; i++) {
+        float* k_origin = &ent->client->kick_origin[i];
+        float* k_angles = &ent->client->kick_angles[i];
+        if (*k_origin < 0.1) *k_origin *= 2;
+        if (*k_angles < 0.1) *k_angles *= 2;
+    }
 
 	// get start / end positions
 	VectorAdd(ent->client->v_angle, ent->client->kick_angles, angles);
