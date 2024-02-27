@@ -413,6 +413,13 @@ void VerifyHeadShot(vec3_t point, vec3_t dir, float height, vec3_t newpoint)
 
 #define HEAD_HEIGHT 12.0f
 
+static int IsPointInCircle(float point_x, float point_y, float center_x, float center_y, float radius)
+{
+    float x = point_x - center_x;
+    float y = point_y - center_y;
+    return (x * x + y * y) < (radius * radius);
+}
+
 void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t dir,
 	  vec3_t point, vec3_t normal, int damage, int knockback, int dflags,
 	  int mod)
@@ -481,7 +488,32 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
 	// base damage is head shot damage, so all the scaling is downwards
 	if (client)
 	{
-
+        if (mod != MOD_KNIFE && mod != MOD_KNIFE_THROWN) {
+            //manually do cylinder check for a hit.
+            //if the point is within the cylinder, then we have a hit
+            //cyliner is defined by the height of the player and the radius of the player
+            //the "point" variable is the point of impact on the bounding box, we need to extend it
+            //in the direction of the shot to see if it is within the cylinder
+            //we also adjust the radius to be smaller if client is moving;
+            float radius = 12.0f;
+            float radius_reduction = VectorLength(client->ps.pmove.velocity)/(8 * 150);
+            radius -= radius_reduction;
+            if (radius < 8.0f)
+                radius = 8.0f;
+            //first though, we check if original point is within the cylinder, too
+            if (!IsPointInCircle(point[0], point[1], targ->s.origin[0], targ->s.origin[1], radius))
+            {
+                //we need to extend the point in the direction of the shot to see if it is within the cylinder
+                vec3_t hitpoint;
+                VectorMA(point, 16, dir, hitpoint); 
+                //if hitpoint is not within the cylinder (circle) then we have a miss
+                if (!IsPointInCircle(hitpoint[0], hitpoint[1], targ->s.origin[0], targ->s.origin[1], radius))
+                {
+                    return;
+                }
+            }
+        }
+        //weapons stuff
 		switch (mod) {
 		case MOD_MK23:
 		case MOD_DUAL:
@@ -513,8 +545,8 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
 				//gi.cprintf(attacker, PRINT_HIGH, "z: %d y: %d x: %d\n", (int)(targ_maxs2 - new_point[2]),(int)(new_point[1]) , (int)(new_point[0]) );
 
 				if ((targ_maxs2 - new_point[2]) < HEAD_HEIGHT
-					&& (abs (new_point[1])) < HEAD_HEIGHT * .8
-					&& (abs (new_point[0])) < HEAD_HEIGHT * .8)
+					&& (abs (new_point[1])) < HEAD_HEIGHT * .575
+					&& (abs (new_point[0])) < HEAD_HEIGHT * .575)
 				{
 					head_success = 1;
 				}
@@ -633,7 +665,7 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
 
 				if (!gotArmor)
 				{
-					damage = damage * .65;
+					damage = damage * .5;
 					gi.cprintf(targ, PRINT_HIGH, "Chest damage\n");
 					if (attacker->client)
 						gi.cprintf(attacker, PRINT_HIGH, "You hit %s in the chest\n",

@@ -1182,6 +1182,8 @@ extern cvar_t *run_roll;
 extern cvar_t *bob_up;
 extern cvar_t *bob_pitch;
 extern cvar_t *bob_roll;
+extern cvar_t *bob_gunbob;
+extern cvar_t *bob_gun_mousemovement;
 
 extern cvar_t *sv_cheats;
 extern cvar_t *maxclients;

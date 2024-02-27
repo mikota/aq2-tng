@@ -2049,18 +2049,36 @@ void weapon_grenade_fire(edict_t* ent, qboolean held)
 	ent->client->grenade_framenum = level.framenum + 1 * HZ;
 }
 
-#define MK23_SPREAD		140
+#define MK23_SPREAD		28
 #define MP5_SPREAD		250 // DW: Changed this back to original from Edition's 240
-#define M4_SPREAD			300
+#define M4_SPREAD		55
 #define SNIPER_SPREAD 425
-#define DUAL_SPREAD   300 // DW: Changed this back to original from Edition's 275
+#define DUAL_SPREAD   120 // DW: Changed this back to original from Edition's 275
+
+int P_HasLaserEquipped(edict_t* ent) {
+    if (INV_AMMO(ent, LASER_NUM) &&
+        (ent->client->curr_weap == MK23_NUM ||
+        ent->client->curr_weap == MP5_NUM ||
+        ent->client->curr_weap == M4_NUM))
+        return 1;
+
+    // Include the Dual MK23 pistol if enabled
+    if (gun_dualmk23_enhance->value && (INV_AMMO(ent, LASER_NUM)) && (ent->client->curr_weap == DUAL_NUM))
+        return 1;
+
+    return 0;
+}
+
+int P_IsCrouching(edict_t* ent) {
+    return (ent->client->ps.pmove.pm_flags & PMF_DUCKED);
+}
 
 int AdjustSpread(edict_t* ent, int spread)
 {
 	int running = 225;		// minimum speed for running
 	int walking = 10;		// minimum speed for walking
 	int laser = 0;
-	float factor[] = { .7f, 1, 2, 6 };
+	float factor[] = { .4f, 1, 2, 6 };
 	int stage = 0;
 
 	// 225 is running
@@ -2069,7 +2087,7 @@ int AdjustSpread(edict_t* ent, int spread)
 		ent->velocity[1] * ent->velocity[1]);
 
 	if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)	// crouching
-		return (spread * .65);
+		return (spread * .4);
 
 	if (INV_AMMO(ent, LASER_NUM) &&
 		(ent->client->curr_weap == MK23_NUM ||
@@ -2099,7 +2117,9 @@ int AdjustSpread(edict_t* ent, int spread)
 		else
 			stage = 1;
 	}
-
+    if (stage > 1) {
+        return spread/1.5 + M4_SPREAD * factor[stage];
+    }
 	return (int)(spread * factor[stage]);
 }
 
@@ -2413,6 +2433,17 @@ void M4_Fire(edict_t* ent)
 	int kick = 90;
 	vec3_t offset;
 	int spread = M4_SPREAD;
+    int adjusted_mg_shots = ent->client->machinegun_shots;
+    int adjusted_mg_limit = 12;
+    if (!P_IsCrouching(ent)) adjusted_mg_limit = 7;
+    if (P_HasLaserEquipped(ent)) adjusted_mg_limit = 3;
+    if (ent->client->machinegun_shots > adjusted_mg_limit) {
+        adjusted_mg_shots = adjusted_mg_limit;
+    }
+    float adjusted_spread = 14;
+    if (P_HasLaserEquipped(ent)) adjusted_spread = 12;
+    if (!P_IsCrouching(ent)) adjusted_spread = 16;
+    spread += adjusted_mg_shots * adjusted_spread;   
 	int height;
 
 	if (ent->client->pers.firing_style == ACTION_FIRING_CLASSIC)
@@ -2481,22 +2512,28 @@ void M4_Fire(edict_t* ent)
 
 	//      gi.cprintf(ent, PRINT_HIGH, "Spread is %d\n", spread);
 
-
 	//Calculate the kick angles
 	for (i = 1; i < 3; i++)
 	{
-		ent->client->kick_origin[i] = crandom() * 0.25;
-		ent->client->kick_angles[i] = crandom() * 0.5;
+		ent->client->kick_origin[i] = crandom() * 0.3 * (0.85 + spread / 300);
+		ent->client->kick_angles[i] = crandom() * 0.4 * (0.85 + spread / 300);
 	}
 	ent->client->kick_origin[0] = crandom() * 0.35;
 	ent->client->kick_angles[0] = ent->client->machinegun_shots * -.7;
-
+    float kickangle_aim_offset = 0.375;
+    if (ent->client->machinegun_shots > 1) {
+        kickangle_aim_offset += ent->client->ping/100.0f * 0.75f;
+        if (kickangle_aim_offset > 1.1f) kickangle_aim_offset = 1.1f;
+    }
+    ent->client->kick_angles[0] += kickangle_aim_offset;
 	// get start / end positions
-	VectorAdd(ent->client->v_angle, ent->client->kick_angles, angles);
+    VectorCopy(ent->client->kick_angles, angles);
+    VectorScale(angles, 1.025f, angles);
+	VectorAdd(ent->client->v_angle, angles, angles);
 	AngleVectors(angles, forward, right, NULL);
 	VectorSet(offset, 0, 8, ent->viewheight - height);
 	P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
-
+    ent->client->kick_angles[0] -= kickangle_aim_offset;
 	if (is_quad)
 		damage *= 1.5f;
 
@@ -2591,7 +2628,7 @@ void M3_Fire(edict_t* ent)
 	setFFState(ent);
 	InitTookDamage();	//FB 6/3/99
 
-	fire_shotgun(ent, start, forward, damage, kick, 800, 800,
+	fire_shotgun(ent, start, forward, damage, kick, 500, 500,
 		12 /*DEFAULT_DEATHMATCH_SHOTGUN_COUNT */, MOD_M3);
 
 	Stats_AddShot(ent, MOD_M3);
@@ -2667,7 +2704,7 @@ void HC_Fire(edict_t* ent)
 		AngleVectors(v, forward, NULL, NULL);
 
 		//half the spread, half the pellets?
-		fire_shotgun(ent, start, forward, sngl_damage, sngl_kick, DEFAULT_SHOTGUN_HSPREAD * 2.5, DEFAULT_SHOTGUN_VSPREAD * 2.5, 34 / 2, MOD_HC);
+		fire_shotgun(ent, start, forward, sngl_damage, sngl_kick, DEFAULT_SHOTGUN_HSPREAD*1.55, DEFAULT_SHOTGUN_VSPREAD*1.55, 34 / 2, MOD_HC);
 
 		ent->client->cannon_rds--;
 	}
@@ -2677,11 +2714,11 @@ void HC_Fire(edict_t* ent)
 
 		v[YAW] = ent->client->v_angle[YAW] - 5;
 		AngleVectors(v, forward, NULL, NULL);
-		fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD * 4, DEFAULT_SHOTGUN_VSPREAD * 4, 34 / 2, MOD_HC);
+		fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD * 2.5, DEFAULT_SHOTGUN_VSPREAD * 2.5, 34 / 2, MOD_HC);
 
 		v[YAW] = ent->client->v_angle[YAW] + 5;
 		AngleVectors(v, forward, NULL, NULL);
-		fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD * 4, DEFAULT_SHOTGUN_VSPREAD * 4 /* was *5 here */, 34 / 2, MOD_HC);
+		fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD * 2.5, DEFAULT_SHOTGUN_VSPREAD * 2.5 /* was *5 here */, 34 / 2, MOD_HC);
 
 		ent->client->cannon_rds -= 2;
 	}
