@@ -58,6 +58,23 @@ trace_t q_gameabi XERP_trace(vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end)
 	return gi.trace(start, mins, maxs, end, xerp_ent, MASK_PLAYERSOLID);
 }
 
+static pmove_state_t XerpPlayer(edict_t *ent, int xerp_msec){
+    static const float player_speed_boundary = 300;
+    pmove_t pm;
+    memcpy(&pm.s, &ent->client->ps.pmove, sizeof(pmove_state_t));
+    pm.trace = XERP_trace;
+    pm.pointcontents = gi.pointcontents;
+    pm.s.pm_type = PM_NORMAL;
+    pm.cmd = ent->client->cmd_last;
+    pm.cmd.msec = xerp_msec;
+    float player_speed = VectorLength(pm.s.velocity);
+    if ((player_speed) < player_speed_boundary) {
+        pm.cmd.msec *= player_speed / player_speed_boundary;
+    }
+    gi.Pmove(&pm);
+    return pm.s;
+}
+
 int G_customizeentityforclient(edict_t *clent, edict_t *ent, entity_state_t *state)
 {
 	if (!clent) // don't touch mvds
@@ -153,7 +170,17 @@ int G_customizeentityforclient(edict_t *clent, edict_t *ent, entity_state_t *sta
 	}
 
 	// extrapolation, if we want that kind of thing (client and server both want it, client not a spectator)
-	if (clent->client->pers.cl_xerp && use_xerp->value && clent->solid != SOLID_NOT)
+    if (sv_pingxerp->value && clent->solid != SOLID_NOT) {
+        if (ent->client) {
+            int xerp_amount = antilag_pingxerp_calc_amt(
+                clent->client->ping, sv_pingxerp_lowerbound->value, sv_pingxerp_upperbound->value);
+            if (xerp_amount > 0) {
+                pmove_state_t xerped = XerpPlayer(ent, xerp_amount);
+                VectorScale(xerped.origin, 0.125, state->origin);
+            }
+        }
+    }
+	else if (clent->client->pers.cl_xerp && use_xerp->value && clent->solid != SOLID_NOT)
 	{
 		if (ent->client) // extrapolate clients
 		{

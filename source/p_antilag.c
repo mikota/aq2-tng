@@ -4,6 +4,18 @@
 cvar_t *sv_antilag;
 cvar_t *sv_antilag_interp;
 
+int antilag_pingxerp_calc_amt(int ping, int lower_bound, int upper_bound) {
+    int xerp_amount;
+    if (ping < lower_bound) {
+        xerp_amount = 0;
+    } else if (ping > upper_bound) {
+        xerp_amount = upper_bound - lower_bound;
+    } else {
+        xerp_amount = ping - lower_bound;
+    }
+    return xerp_amount;
+}
+
 void antilag_update(edict_t *ent)
 {
 	antilag_t *state = &(ent->client->antilag_state);
@@ -67,8 +79,13 @@ void antilag_rewind_all(edict_t *ent)
 		return;
 
 	float time_to_seek = ent->client->antilag_state.curr_timestamp;
-
-	time_to_seek -= ((float)ent->client->ping) / 1000;
+    int antilag_amt = ent->client->ping;
+    if (sv_pingxerp->value) {
+        int xerp_amt = antilag_pingxerp_calc_amt(
+            ent->client->ping, sv_pingxerp_lowerbound, sv_pingxerp_upperbound);
+        antilag_amt = ent->client->ping - xerp_amt;
+    }
+	time_to_seek -= ((float)antilag_amt) / 1000.0f;
 	if (time_to_seek < level.time - ANTILAG_REWINDCAP)
 		time_to_seek = level.time - ANTILAG_REWINDCAP;
 
@@ -138,3 +155,4 @@ void antilag_unmove_all(void)
 		gi.linkentity(who);
 	}
 }
+
