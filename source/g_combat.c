@@ -495,14 +495,14 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
             //the "point" variable is the point of impact on the bounding box, we need to extend it
             //in the direction of the shot to see if it is within the cylinder
             //we also adjust the radius to be smaller if client is moving;
-            float radius = 13.25f;
-            float radius_reduction = VectorLength(client->ps.pmove.velocity)/(8 * 450);
+            float radius = 13.0f;
+            float radius_reduction = VectorLength(client->ps.pmove.velocity)/(8 * 500);
             if (mod == MOD_SNIPER)
-                radius_reduction *= 1.65; //if shooting with sniper, you need to be more accurate
+                radius_reduction *= 1.15; //if shooting with sniper, you need to be more accurate
             if (mod == MOD_MK23)
                 radius_reduction *= 0.875;
             if (client->curr_weap != SNIPER_NUM)
-                radius_reduction *= 1.55; //if holding sniper, you already get the advantage of full moving accuracy, dont need the extra reduction
+                radius_reduction *= 1.375; //if holding sniper, you already get the advantage of full moving accuracy, dont need the extra reduction
             radius -= radius_reduction;
             if (radius < 8.0f)
                 radius = 8.0f;

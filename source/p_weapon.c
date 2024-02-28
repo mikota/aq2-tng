@@ -2051,7 +2051,7 @@ void weapon_grenade_fire(edict_t* ent, qboolean held)
 
 #define MK23_SPREAD		20
 #define MP5_SPREAD		250 // DW: Changed this back to original from Edition's 240
-#define M4_SPREAD		32
+#define M4_SPREAD		35
 #define SNIPER_SPREAD 425
 #define DUAL_SPREAD   120 // DW: Changed this back to original from Edition's 275
 
@@ -2078,7 +2078,7 @@ int AdjustSpread(edict_t* ent, int spread)
 	int running = 225;		// minimum speed for running
 	int walking = 10;		// minimum speed for walking
 	int laser = 0;
-	float factor[] = { .4f, 1, 2, 6 };
+	float factor[] = { .4f, 1.5, 3.5, 8 };
 	int stage = 0;
 
 	// 225 is running
@@ -2118,7 +2118,7 @@ int AdjustSpread(edict_t* ent, int spread)
 			stage = 1;
 	}
     if (stage > 1) {
-        return spread/1.5 + M4_SPREAD * factor[stage];
+        return spread/1.25 + M4_SPREAD * factor[stage];
     }
 	return (int)(spread * factor[stage]);
 }
@@ -2527,9 +2527,9 @@ void M4_Fire(edict_t* ent)
 	}
 	ent->client->kick_origin[0] = crandom() * 0.35;
 	ent->client->kick_angles[0] = ent->client->machinegun_shots * -.7;
-    float kickangle_aim_offset = 0.375;
+    float kickangle_aim_offset = 0.325;
     if (ent->client->machinegun_shots > 1) {
-        kickangle_aim_offset += ent->client->ping/100.0f * 0.75f;
+        kickangle_aim_offset += ent->client->ping/100.0f * 0.7f;
         if (kickangle_aim_offset > 1.1f) kickangle_aim_offset = 1.1f;
     }
     ent->client->kick_angles[0] += kickangle_aim_offset;
