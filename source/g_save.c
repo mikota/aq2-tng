@@ -620,7 +620,7 @@ void InitGame( void )
 	use_newirvision = gi.cvar("use_newirvision", "1", 0);
 	use_indicators = gi.cvar("use_indicators", "1", 0);
 	use_xerp = gi.cvar("use_xerp", "1", 0);
-    sv_pingxerp = gi.cvar("sv_pingxerp", "1", 0);
+    sv_pingxerp = gi.cvar("sv_pingxerp", "0", 0);
     sv_pingxerp_lowerbound = gi.cvar("sv_pingxerp_lowerbound", "20", 0);
     sv_pingxerp_upperbound = gi.cvar("sv_pingxerp_upperbound", "55", 0);
     

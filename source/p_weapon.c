@@ -2050,8 +2050,8 @@ void weapon_grenade_fire(edict_t* ent, qboolean held)
 }
 
 #define MK23_SPREAD		20
-#define MP5_SPREAD		250 // DW: Changed this back to original from Edition's 240
-#define M4_SPREAD		35
+#define MP5_SPREAD		28 // DW: Changed this back to original from Edition's 240
+#define M4_SPREAD		82
 #define SNIPER_SPREAD 425
 #define DUAL_SPREAD   120 // DW: Changed this back to original from Edition's 275
 
@@ -2078,7 +2078,7 @@ int AdjustSpread(edict_t* ent, int spread)
 	int running = 225;		// minimum speed for running
 	int walking = 10;		// minimum speed for walking
 	int laser = 0;
-	float factor[] = { .4f, 1.5, 3.5, 8 };
+	float factor[] = { .5f, 1.0, 3.25, 8 };
 	int stage = 0;
 
 	// 225 is running
@@ -2087,7 +2087,7 @@ int AdjustSpread(edict_t* ent, int spread)
 		ent->velocity[1] * ent->velocity[1]);
 
 	if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)	// crouching
-		return (spread * .4);
+		return spread * factor[0];
 
 	if (INV_AMMO(ent, LASER_NUM) &&
 		(ent->client->curr_weap == MK23_NUM ||
@@ -2118,7 +2118,7 @@ int AdjustSpread(edict_t* ent, int spread)
 			stage = 1;
 	}
     if (stage > 1) {
-        return spread/1.25 + M4_SPREAD * factor[stage];
+        return spread/1.5 + M4_SPREAD * factor[stage];
     }
 	return (int)(spread * factor[stage]);
 }
@@ -2441,15 +2441,16 @@ void M4_Fire(edict_t* ent)
 	vec3_t offset;
 	int spread = M4_SPREAD;
     int adjusted_mg_shots = ent->client->machinegun_shots;
-    int adjusted_mg_limit = 12;
-    if (!P_IsCrouching(ent)) adjusted_mg_limit = 7;
+    int adjusted_mg_limit = 10;
+    if (!P_IsCrouching(ent)) adjusted_mg_limit = 6;
     if (P_HasLaserEquipped(ent)) adjusted_mg_limit = 3;
     if (ent->client->machinegun_shots > adjusted_mg_limit) {
         adjusted_mg_shots = adjusted_mg_limit;
     }
-    float adjusted_spread = 14;
-    if (P_HasLaserEquipped(ent)) adjusted_spread = 12;
-    if (!P_IsCrouching(ent)) adjusted_spread = 16;
+    float adjusted_spread = 13;
+    if (P_HasLaserEquipped(ent)) adjusted_spread = 10;
+    if (P_HasLaserEquipped(ent) && P_IsCrouching(ent)) adjusted_spread = 4;
+    if (!P_IsCrouching(ent)) adjusted_spread = 18;
     spread += adjusted_mg_shots * adjusted_spread;   
 	int height;
 
@@ -2527,7 +2528,7 @@ void M4_Fire(edict_t* ent)
 	}
 	ent->client->kick_origin[0] = crandom() * 0.35;
 	ent->client->kick_angles[0] = ent->client->machinegun_shots * -.7;
-    float kickangle_aim_offset = 0.325;
+    float kickangle_aim_offset = 0.3;
     if (ent->client->machinegun_shots > 1) {
         kickangle_aim_offset += ent->client->ping/100.0f * 0.7f;
         if (kickangle_aim_offset > 1.1f) kickangle_aim_offset = 1.1f;

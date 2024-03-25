@@ -84,7 +84,7 @@ void antilag_rewind_all(edict_t *ent)
         int xerp_amt = antilag_pingxerp_calc_amt(
             ent->client->ping, sv_pingxerp_lowerbound, sv_pingxerp_upperbound);
         antilag_amt = ent->client->ping - xerp_amt;
-        antilag_amt += xerp_amt / 4; // to account for xerp not being fully accurate
+        antilag_amt += xerp_amt / 3; // to account for xerp not being fully accurate
     }
 	time_to_seek -= ((float)antilag_amt) / 1000.0f;
 	if (time_to_seek < level.time - ANTILAG_REWINDCAP)
