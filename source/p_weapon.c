@@ -2050,8 +2050,8 @@ void weapon_grenade_fire(edict_t* ent, qboolean held)
 }
 
 #define MK23_SPREAD		20
-#define MP5_SPREAD		28 // DW: Changed this back to original from Edition's 240
-#define M4_SPREAD		82
+#define MP5_SPREAD		105 // DW: Changed this back to original from Edition's 240
+#define M4_SPREAD		96
 #define SNIPER_SPREAD 425
 #define DUAL_SPREAD   120 // DW: Changed this back to original from Edition's 275
 
@@ -2319,8 +2319,8 @@ void MP5_Fire(edict_t* ent)
 	vec3_t start;
 	vec3_t forward, right;
 	vec3_t angles;
-	int damage = 55;
-	int kick = 90;
+	int damage = 70;
+	int kick = 110;
 	vec3_t offset;
 	int spread = MP5_SPREAD;
 	int height;
@@ -2447,10 +2447,10 @@ void M4_Fire(edict_t* ent)
     if (ent->client->machinegun_shots > adjusted_mg_limit) {
         adjusted_mg_shots = adjusted_mg_limit;
     }
-    float adjusted_spread = 13;
+    float adjusted_spread = 14;
     if (P_HasLaserEquipped(ent)) adjusted_spread = 10;
     if (P_HasLaserEquipped(ent) && P_IsCrouching(ent)) adjusted_spread = 4;
-    if (!P_IsCrouching(ent)) adjusted_spread = 18;
+    if (!P_IsCrouching(ent)) adjusted_spread = 16;
     spread += adjusted_mg_shots * adjusted_spread;   
 	int height;
 

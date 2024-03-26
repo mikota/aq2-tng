@@ -438,6 +438,7 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
 	float from_top;
 	vec_t dist;
 	float targ_maxs2;		//FB 6/1/99
+    float headshot_dmg_multiplier = 1.8f;
 
 	// do this before teamplay check
 	if (!targ->takedamage)
@@ -469,6 +470,10 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
 		}
 	}
 
+    if (mod == MOD_MP5) {
+        headshot_dmg_multiplier = 1.4f;
+    }
+
 	// damage reduction for shotgun
 	// if far away, reduce it to original action levels
 	if (mod == MOD_M3)
@@ -499,14 +504,14 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
             //we also adjust the radius to be smaller if client is moving;
             float radius = 11.2f;
             if (mod == MOD_SNIPER)
-                radius += 2.1f;
+                radius += 2.5f;
             float radius_reduction = VectorLength(client->ps.pmove.velocity)/(8 * 950);
             if (mod == MOD_SNIPER)
                 radius_reduction *= 0.6; //if shooting with sniper, you need to be more accurate
             if (mod == MOD_MK23)
                 radius_reduction *= 0.8;
             if (client->curr_weap != SNIPER_NUM)
-                radius_reduction *= 1.15; //if holding sniper, you already get the advantage of full moving accuracy, dont need the extra reduction
+                radius_reduction *= 1.125; //if holding sniper, you already get the advantage of full moving accuracy, dont need the extra reduction
             radius -= radius_reduction;
             if (radius < 8.0f)
                 radius = 8.0f;
@@ -536,14 +541,18 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
             switch (mod) {
             case MOD_MK23:
             case MOD_DUAL:
+            case MOD_MP5:
                 // damage reduction for longer range pistol shots
                 dist = Distance( targ->s.origin, inflictor->s.origin );
-                if (dist > 1400.0)
-                    damage = (int)(damage * 1 / 2);
-                else if (dist > 600.0)
-                    damage = (int)(damage * 2 / 3);
+                float adj_dist = dist;
+                if (dist > 100) { 
+                    if (dist > 1400.0)
+                        adj_dist = 1400.0;
+                    float damage_falloff = 0.65;
+                    damage *= (1 - (damage_falloff * (adj_dist - 100) / 1300));
+                    
+                }
                 //Fallthrough
-            case MOD_MP5:
             case MOD_M4:
             case MOD_SNIPER:
             case MOD_KNIFE:
@@ -600,7 +609,7 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
 
                     if (!gotArmor)
                     {
-                        damage = damage * 1.8 + 1;
+                        damage = damage * headshot_dmg_multiplier + 1;
                         gi.cprintf(targ, PRINT_HIGH, "Head damage\n");
                         if (attacker->client)
                             gi.cprintf(attacker, PRINT_HIGH, "You hit %s in the head\n", client->pers.netname);
