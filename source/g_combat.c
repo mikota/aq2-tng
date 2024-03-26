@@ -544,12 +544,13 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
             case MOD_MP5:
                 // damage reduction for longer range pistol shots
                 dist = Distance( targ->s.origin, inflictor->s.origin );
-                float adj_dist = dist;
+                const float adj_dist = dist;
+                const float max_dist = 1800.0f;
                 if (dist > 100) { 
-                    if (dist > 1400.0)
-                        adj_dist = 1400.0;
-                    float damage_falloff = 0.65;
-                    damage *= (1 - (damage_falloff * (adj_dist - 100) / 1300));
+                    if (dist > max_dist)
+                        adj_dist = max_dist;
+                    float damage_falloff = 0.5f;
+                    damage *= (1 - (damage_falloff * (adj_dist - 100) / (max_dist - 100)));
                     
                 }
                 //Fallthrough

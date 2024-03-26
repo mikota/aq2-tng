@@ -2050,7 +2050,7 @@ void weapon_grenade_fire(edict_t* ent, qboolean held)
 }
 
 #define MK23_SPREAD		20
-#define MP5_SPREAD		105 // DW: Changed this back to original from Edition's 240
+#define MP5_SPREAD		70 // DW: Changed this back to original from Edition's 240
 #define M4_SPREAD		96
 #define SNIPER_SPREAD 425
 #define DUAL_SPREAD   120 // DW: Changed this back to original from Edition's 275
@@ -2212,8 +2212,8 @@ void Pistol_Fire(edict_t* ent)
 	vec3_t start;
 	vec3_t forward, right;
 	vec3_t angles;
-	int damage = 90;
-	int kick = 150;
+	int damage = 100;
+	int kick = 160;
 	vec3_t offset;
 	int spread = MK23_SPREAD;
 	int height;
@@ -2319,7 +2319,7 @@ void MP5_Fire(edict_t* ent)
 	vec3_t start;
 	vec3_t forward, right;
 	vec3_t angles;
-	int damage = 70;
+	int damage = 82;
 	int kick = 110;
 	vec3_t offset;
 	int spread = MP5_SPREAD;
