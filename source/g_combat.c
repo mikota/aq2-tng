@@ -502,7 +502,7 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
             //the "point" variable is the point of impact on the bounding box, we need to extend it
             //in the direction of the shot to see if it is within the cylinder
             //we also adjust the radius to be smaller if client is moving;
-            float radius = 11.2f;
+            float radius = 11.5f;
             if (mod == MOD_SNIPER)
                 radius += 2.5f;
             float radius_reduction = VectorLength(client->ps.pmove.velocity)/(8 * 950);
@@ -544,12 +544,12 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
             case MOD_MP5:
                 // damage reduction for longer range pistol shots
                 dist = Distance( targ->s.origin, inflictor->s.origin );
-                const float adj_dist = dist;
+                float adj_dist = dist;
                 const float max_dist = 1800.0f;
                 if (dist > 100) { 
                     if (dist > max_dist)
                         adj_dist = max_dist;
-                    float damage_falloff = 0.5f;
+                    const float damage_falloff = 0.5f;
                     damage *= (1 - (damage_falloff * (adj_dist - 100) / (max_dist - 100)));
                     
                 }
