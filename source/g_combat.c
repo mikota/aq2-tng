@@ -515,6 +515,13 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
             radius -= radius_reduction;
             if (radius < 8.0f)
                 radius = 8.0f;
+            //let's not do as much radius reduction close range:
+            float dist = Distance(targ->s.origin, inflictor->s.origin);
+            const float max_dist = 2000.0f;
+            if (dist < max_dist) {
+                radius_reduction *= (dist / max_dist);
+            }
+            
             if (mod == MOD_M4) {
                 radius *= 0.98;
                 headshot_radius -= radius_reduction/3;
