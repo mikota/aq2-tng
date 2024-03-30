@@ -507,7 +507,7 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
                 radius += 2.5f;
             float radius_reduction = VectorLength(client->ps.pmove.velocity)/(8 * 950);
             if (mod == MOD_SNIPER)
-                radius_reduction *= 0.6; //if shooting with sniper, you need to be more accurate
+                radius_reduction *= 0.5; //if shooting with sniper, you need to be more accurate
             if (mod == MOD_MK23)
                 radius_reduction *= 0.8;
             if (client->curr_weap != SNIPER_NUM)
