@@ -502,7 +502,7 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
             //the "point" variable is the point of impact on the bounding box, we need to extend it
             //in the direction of the shot to see if it is within the cylinder
             //we also adjust the radius to be smaller if client is moving;
-            float radius = 11.5f;
+            float radius = 11.4f;
             if (mod == MOD_SNIPER)
                 radius += 2.5f;
             float radius_reduction = VectorLength(client->ps.pmove.velocity)/(8 * 950);
