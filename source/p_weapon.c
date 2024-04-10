@@ -2049,11 +2049,11 @@ void weapon_grenade_fire(edict_t* ent, qboolean held)
 	ent->client->grenade_framenum = level.framenum + 1 * HZ;
 }
 
-#define MK23_SPREAD		20
-#define MP5_SPREAD		70 // DW: Changed this back to original from Edition's 240
-#define M4_SPREAD		106
-#define SNIPER_SPREAD 425
-#define DUAL_SPREAD   140 // DW: Changed this back to original from Edition's 275
+#define MK23_SPREAD		18
+#define MP5_SPREAD		65 // DW: Changed this back to original from Edition's 240
+#define M4_SPREAD		96
+#define SNIPER_SPREAD 300
+#define DUAL_SPREAD   120 // DW: Changed this back to original from Edition's 275
 
 int P_HasLaserEquipped(edict_t* ent) {
     if (INV_AMMO(ent, LASER_NUM) &&
@@ -2078,7 +2078,7 @@ int AdjustSpread(edict_t* ent, int spread, int base_spread)
 	int running = 225;		// minimum speed for running
 	int walking = 10;		// minimum speed for walking
 	int laser = 0;
-	float factor[] = { .55f, 1.0, 3.25, 8 };
+	float factor[] = { .55f, 1.0, 3.25, 6.5 };
 	int stage = 0;
 
 	// 225 is running
@@ -2118,7 +2118,7 @@ int AdjustSpread(edict_t* ent, int spread, int base_spread)
 			stage = 1;
 	}
     if (stage > 1) {
-        return spread/1.5 + M4_SPREAD * factor[stage];
+        return spread/1.5 + (M4_SPREAD + base_spread)/2.0f * factor[stage];
     }
 	return (int)(spread * factor[stage]);
 }
@@ -2273,7 +2273,7 @@ void Pistol_Fire(edict_t* ent)
 		EjectShell(ent, result, 0);
 	}
 
-	spread = AdjustSpread(ent, spread, MK23_SPREAD*3);
+	spread = AdjustSpread(ent, spread, MK23_SPREAD*4);
 
 	if (ent->client->pers.mk23_mode)
 		spread *= .7;
