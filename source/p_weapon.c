@@ -2447,10 +2447,10 @@ void M4_Fire(edict_t* ent)
     if (ent->client->machinegun_shots > adjusted_mg_limit) {
         adjusted_mg_shots = adjusted_mg_limit;
     }
-    float adjusted_spread = 14;
-    if (P_HasLaserEquipped(ent)) adjusted_spread = 10;
+    float adjusted_spread = 11;
+    if (P_HasLaserEquipped(ent)) adjusted_spread = 8;
     if (P_HasLaserEquipped(ent) && P_IsCrouching(ent)) adjusted_spread = 4;
-    if (!P_IsCrouching(ent)) adjusted_spread = 16;
+    if (!P_IsCrouching(ent)) adjusted_spread = 14;
     spread += adjusted_mg_shots * adjusted_spread;   
 	int height;
 
