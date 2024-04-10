@@ -2049,11 +2049,11 @@ void weapon_grenade_fire(edict_t* ent, qboolean held)
 	ent->client->grenade_framenum = level.framenum + 1 * HZ;
 }
 
-#define MK23_SPREAD		18
-#define MP5_SPREAD		65 // DW: Changed this back to original from Edition's 240
-#define M4_SPREAD		96
+#define MK23_SPREAD		20
+#define MP5_SPREAD		70 // DW: Changed this back to original from Edition's 240
+#define M4_SPREAD		106
 #define SNIPER_SPREAD 300
-#define DUAL_SPREAD   120 // DW: Changed this back to original from Edition's 275
+#define DUAL_SPREAD   130 // DW: Changed this back to original from Edition's 275
 
 int P_HasLaserEquipped(edict_t* ent) {
     if (INV_AMMO(ent, LASER_NUM) &&
@@ -2447,10 +2447,10 @@ void M4_Fire(edict_t* ent)
     if (ent->client->machinegun_shots > adjusted_mg_limit) {
         adjusted_mg_shots = adjusted_mg_limit;
     }
-    float adjusted_spread = 11;
-    if (P_HasLaserEquipped(ent)) adjusted_spread = 8;
+    float adjusted_spread = 12;
+    if (P_HasLaserEquipped(ent)) adjusted_spread = 9;
     if (P_HasLaserEquipped(ent) && P_IsCrouching(ent)) adjusted_spread = 4;
-    if (!P_IsCrouching(ent)) adjusted_spread = 14;
+    if (!P_IsCrouching(ent)) adjusted_spread = 16;
     spread += adjusted_mg_shots * adjusted_spread;   
 	int height;
 
