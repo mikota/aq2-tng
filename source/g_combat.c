@@ -494,7 +494,7 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
 	if (client)
 	{
         int successful_hit = 1;
-        float headshot_radius = 0.625;
+        float headshot_radius = 0.62;
         if (mod != MOD_KNIFE && mod != MOD_KNIFE_THROWN) {
             //manually do cylinder check for a hit.
             //if the point is within the cylinder, then we have a hit
@@ -502,14 +502,15 @@ void T_Damage (edict_t * targ, edict_t * inflictor, edict_t * attacker, vec3_t d
             //the "point" variable is the point of impact on the bounding box, we need to extend it
             //in the direction of the shot to see if it is within the cylinder
             //we also adjust the radius to be smaller if client is moving;
-            float radius = 10.75f;
+            float radius = 10.45f;
             if (mod == MOD_SNIPER)
-                radius += 2.75f;
+                radius += 3.0f;
             float radius_reduction = VectorLength(client->ps.pmove.velocity)/(8 * 1000);
             if (mod == MOD_SNIPER)
                 radius_reduction *= 0.5; //if shooting with sniper, you need to be more accurate
             if (mod == MOD_MK23)
                 radius_reduction *= 0.7;
+                radius += 1.25f;
             if (client->curr_weap != SNIPER_NUM)
                 radius_reduction *= 1.125; //if holding sniper, you already get the advantage of full moving accuracy, dont need the extra reduction
             radius -= radius_reduction;
