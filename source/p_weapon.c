@@ -2528,7 +2528,7 @@ void M4_Fire(edict_t* ent)
 	}
 	ent->client->kick_origin[0] = crandom() * 0.35;
 	ent->client->kick_angles[0] = ent->client->machinegun_shots * -.7;
-    float kickangle_aim_offset = 0.3;
+    float kickangle_aim_offset = 0.15;
     if (ent->client->machinegun_shots > 1) {
         kickangle_aim_offset += ent->client->ping/100.0f * 0.7f;
         if (kickangle_aim_offset > 1.1f) kickangle_aim_offset = 1.1f;
