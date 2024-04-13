@@ -501,7 +501,7 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
     if (client)
     {
         int successful_hit = 1;
-        float headshot_radius = 0.62;
+        float headshot_radius = 0.625;
         if (mod != MOD_KNIFE && mod != MOD_KNIFE_THROWN)
         {
             // manually do cylinder check for a hit.
@@ -512,8 +512,9 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
             // we also adjust the radius to be smaller if client is moving;
             float radius = 11.75f;
             if (mod == MOD_SNIPER)
-                radius += 3.0f;
+                radius += 3.00f;
             float radius_reduction = VectorLength(client->ps.pmove.velocity) / (8 * 1000);
+            radius_reduction = 0;
             if (mod == MOD_SNIPER)
                 radius_reduction *= 0; // if shooting with sniper, you need to be more accurate
             if (mod == MOD_MK23) {
