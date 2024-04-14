@@ -2050,8 +2050,8 @@ void weapon_grenade_fire(edict_t* ent, qboolean held)
 }
 
 #define MK23_SPREAD		20
-#define MP5_SPREAD		70 // DW: Changed this back to original from Edition's 240
-#define M4_SPREAD		98
+#define MP5_SPREAD		62 // DW: Changed this back to original from Edition's 240
+#define M4_SPREAD		90
 #define SNIPER_SPREAD 300
 #define DUAL_SPREAD   130 // DW: Changed this back to original from Edition's 275
 
