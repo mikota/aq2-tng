@@ -170,7 +170,7 @@ int G_customizeentityforclient(edict_t *clent, edict_t *ent, entity_state_t *sta
 	}
 
     if (ent->client && clent->solid != SOLID_NOT) {
-        pmove_state_t xerped = XerpPlayer(ent, 15);
+        pmove_state_t xerped = XerpPlayer(ent, 20);
         VectorScale(xerped.origin, 0.125, state->origin);
     }
 	// extrapolation, if we want that kind of thing (client and server both want it, client not a spectator)

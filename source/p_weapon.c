@@ -1944,14 +1944,23 @@ Weapon_Generic(edict_t* ent, int FRAME_ACTIVATE_LAST, int FRAME_FIRE_LAST,
 
 				fire(ent);
 				break;
-			}
+			} else {
+           //     VectorClear(ent->client->kick_angles);
+                ent->client->kick_angles[0] = 0;
+            }
 		}
 
-		if (!fire_frames[n])
+		if (!fire_frames[n]) {
 			ent->client->ps.gunframe++;
-
-		if (ent->client->ps.gunframe == FRAME_IDLE_FIRST + 1)
+//            VectorClear(ent->client->kick_angles);
+            ent->client->kick_angles[0] = 0;
+        }
+        if (ent->client->ps.gunframe == FRAME_IDLE_FIRST) {
+            VectorClear(ent->client->kick_angles);
+        }
+		if (ent->client->ps.gunframe == FRAME_IDLE_FIRST + 1) {
 			ent->client->weaponstate = WEAPON_READY;
+        }
 	}
 	// player switched into 
 	if (ent->client->weaponstate == WEAPON_BURSTING)
@@ -2051,9 +2060,9 @@ void weapon_grenade_fire(edict_t* ent, qboolean held)
 
 #define MK23_SPREAD		20
 #define MP5_SPREAD		62 // DW: Changed this back to original from Edition's 240
-#define M4_SPREAD		90
+#define M4_SPREAD		112
 #define SNIPER_SPREAD 300
-#define DUAL_SPREAD   130 // DW: Changed this back to original from Edition's 275
+#define DUAL_SPREAD   150 // DW: Changed this back to original from Edition's 275
 
 int P_HasLaserEquipped(edict_t* ent) {
     if (INV_AMMO(ent, LASER_NUM) &&
@@ -2078,7 +2087,7 @@ int AdjustSpread(edict_t* ent, int spread, int base_spread)
 	int running = 225;		// minimum speed for running
 	int walking = 10;		// minimum speed for walking
 	int laser = 0;
-	float factor[] = { .55f, 1.0, 3.25, 6.5 };
+	float factor[] = { .55f, 1.0, 3.25, 6.0 };
 	int stage = 0;
 
 	// 225 is running
@@ -2447,10 +2456,10 @@ void M4_Fire(edict_t* ent)
     if (ent->client->machinegun_shots > adjusted_mg_limit) {
         adjusted_mg_shots = adjusted_mg_limit;
     }
-    float adjusted_spread = 12;
-    if (P_HasLaserEquipped(ent)) adjusted_spread = 9;
+    float adjusted_spread = 9;
+    if (P_HasLaserEquipped(ent)) adjusted_spread = 6;
     if (P_HasLaserEquipped(ent) && P_IsCrouching(ent)) adjusted_spread = 4;
-    if (!P_IsCrouching(ent)) adjusted_spread = 16;
+    if (!P_IsCrouching(ent)) adjusted_spread = 13;
     spread += adjusted_mg_shots * adjusted_spread;   
 	int height;
 
@@ -2520,20 +2529,22 @@ void M4_Fire(edict_t* ent)
 
 	//      gi.cprintf(ent, PRINT_HIGH, "Spread is %d\n", spread);
 
+    ent->client->kick_angles[2] = 0;
 	//Calculate the kick angles
 	for (i = 1; i < 3; i++)
 	{
-		ent->client->kick_origin[i] = crandom() * 0.3 * (0.85 + spread / 300);
-		ent->client->kick_angles[i] = crandom() * 0.4 * (0.85 + spread / 300);
+		ent->client->kick_origin[i] = crandom() * 0.3 * (1.65 + spread / 400);
+		ent->client->kick_angles[i] += crandom() * 0.25 * (1.65 + spread / 400);
 	}
 	ent->client->kick_origin[0] = crandom() * 0.35;
 	ent->client->kick_angles[0] = ent->client->machinegun_shots * -.7;
-    float kickangle_aim_offset = 0.15;
+    float kickangle_aim_offset = 0.25;
     if (ent->client->machinegun_shots > 1) {
         kickangle_aim_offset += ent->client->ping/100.0f * 0.7f;
         if (kickangle_aim_offset > 1.1f) kickangle_aim_offset = 1.1f;
     }
     ent->client->kick_angles[0] += kickangle_aim_offset;
+    //ent->client->kick_angles[1] += 1;
 	// get start / end positions
     VectorCopy(ent->client->kick_angles, angles);
     VectorScale(angles, 1.025f, angles);

@@ -501,7 +501,7 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
     if (client)
     {
         int successful_hit = 1;
-        float headshot_radius = 0.62;
+        float headshot_radius = 0.69;
         if (mod != MOD_KNIFE && mod != MOD_KNIFE_THROWN)
         {
             // manually do cylinder check for a hit.
@@ -510,35 +510,32 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
             // the "point" variable is the point of impact on the bounding box, we need to extend it
             // in the direction of the shot to see if it is within the cylinder
             // we also adjust the radius to be smaller if client is moving;
-            float radius = 12.85f;
+            float radius = 15.0f;
             if (mod == MOD_SNIPER)
-                radius += 2.75f;
-            float radius_reduction = VectorLength(client->ps.pmove.velocity) / (8 * 1000);
-            radius_reduction = 0;
-            if (mod == MOD_SNIPER)
-                radius_reduction *= 0; // if shooting with sniper, you need to be more accurate
-            if (mod == MOD_MK23) {
-                radius_reduction *= 0.5;
-                radius += 2.75f;
+                radius += 1.00f;
+            float radius_reduction = 0;
+            if (mod == MOD_SNIPER) {
+                headshot_radius = 0.69;
             }
-            if (client->curr_weap != SNIPER_NUM)
-                radius_reduction *= 1.125; // if holding sniper, you already get the advantage of full moving accuracy, dont need the extra reduction
-            radius -= radius_reduction;
+            if (mod == MOD_MK23) {
+                radius += 1.75f;
+            }
             if (radius < 8.0f)
                 radius = 8.0f;
-            // let's not do as much radius reduction close range:
-            float dist = Distance(targ->s.origin, inflictor->s.origin);
-            const float max_dist = 2000.0f;
-            if (dist < max_dist)
-            {
-                radius_reduction *= (dist / max_dist);
-            }
+            if (mod == MOD_M4) {
+                dist = Distance(targ->s.origin, inflictor->s.origin);
+                const float max_dist = 1800.0f;
+                const float min_dist = 100.0f;
+                const float max_radius = 16.0f;
+                const float min_radius = 14.5f;
 
-            if (mod == MOD_M4)
-            {
-                headshot_radius -= radius_reduction / 3;
-                if (headshot_radius < 0.5)
-                    headshot_radius = 0.5;
+                if (dist > min_dist)
+                {
+                    float adj_dist = dist > max_dist ? max_dist : dist;
+                    
+                    // Linear interpolation to adjust radius
+                    radius = max_radius - ((adj_dist - min_dist) / (max_dist - min_dist)) * (max_radius - min_radius);
+                }
             }
             // Com_Printf("radius: %f\n", radius);
             // first though, we check if original point is within the cylinder, too
@@ -588,14 +585,17 @@ void T_Damage(edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
                 bleeding = 1;
                 instant_dam = 0;
 
-                if (from_top < 2 * HEAD_HEIGHT)
+                if (from_top < 2 * HEAD_HEIGHT && from_top > 3)
                 {
                     vec3_t new_point;
                     VerifyHeadShot(point, dir, HEAD_HEIGHT, new_point);
                     VectorSubtract(new_point, targ->s.origin, new_point);
                     // gi.cprintf(attacker, PRINT_HIGH, "z: %d y: %d x: %d\n", (int)(targ_maxs2 - new_point[2]),(int)(new_point[1]) , (int)(new_point[0]) );
 
-                    if ((targ_maxs2 - new_point[2]) < HEAD_HEIGHT && (abs(new_point[1])) < HEAD_HEIGHT * headshot_radius && (abs(new_point[0])) < HEAD_HEIGHT * headshot_radius)
+                    if ((targ_maxs2 - new_point[2]) < HEAD_HEIGHT
+                        && (abs(new_point[1])) < HEAD_HEIGHT * headshot_radius
+                        && (abs(new_point[0])) < HEAD_HEIGHT * headshot_radius
+                        )
                     {
                         head_success = 1;
                     }

@@ -3484,8 +3484,12 @@ static void ClientThinkWeaponIfReady( edict_t *ent, qboolean update_idle )
 
 	// Clear weapon kicks.
 	VectorClear( ent->client->kick_origin );
-	VectorClear( ent->client->kick_angles );
-
+    if (ent->client->curr_weap != M4_NUM || (
+        ent->client->curr_weap == M4_NUM && ent->client->weaponstate != WEAPON_FIRING
+    )) {
+	    VectorClear( ent->client->kick_angles );
+    }
+    VectorClear( ent->client->kick_origin );
 	old_weaponstate = ent->client->weaponstate;
 	old_gunframe = ent->client->ps.gunframe;
 

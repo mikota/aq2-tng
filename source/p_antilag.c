@@ -79,7 +79,7 @@ void antilag_rewind_all(edict_t *ent)
 		return;
 
 	float time_to_seek = ent->client->antilag_state.curr_timestamp;
-    int antilag_amt = ent->client->ping;
+    int antilag_amt = ent->client->ping + 20;
     if (sv_pingxerp->value) {
         int xerp_amt = antilag_pingxerp_calc_amt(
             ent->client->ping, sv_pingxerp_lowerbound, sv_pingxerp_upperbound);
@@ -87,7 +87,7 @@ void antilag_rewind_all(edict_t *ent)
         antilag_amt += xerp_amt / 3; // to account for xerp not being fully accurate
     }
 	time_to_seek -= ((float)antilag_amt) / 1000.0f;
-    const float epicmod_extra_delay = -8 / 1000.0f;
+    const float epicmod_extra_delay = 0;
     time_to_seek += epicmod_extra_delay;
 	if (time_to_seek < level.time - ANTILAG_REWINDCAP)
 		time_to_seek = level.time - ANTILAG_REWINDCAP;
