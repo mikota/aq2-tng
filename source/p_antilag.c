@@ -38,8 +38,15 @@ float antilag_findseek(edict_t *ent, float time_stamp)
 	{
 		if (state->hist_timestamp[(state->seek - offs) & ANTILAG_MASK] && state->hist_timestamp[(state->seek - offs) & ANTILAG_MASK] <= time_stamp)
 		{
-			if ((offs - 1) < 0) // never return a timestamp from the future aka erroneous crap
-				return -1;
+            if (offs == 0) {
+                float advanced_since_svframe = state->curr_timestamp - level.time;
+                if (advanced_since_svframe <= 0) return -1;
+
+                float timestamp_since_svframe = time_stamp - level.time;
+                if (timestamp_since_svframe <= 0) return state->seek;
+                if (timestamp_since_svframe >= advanced_since_svframe) return state->seek;
+                return (float)(state->seek) + (timestamp_since_svframe / advanced_since_svframe);
+            }
 
 			float frac = 1;
 			float stamp_last = state->hist_timestamp[(state->seek - offs) & ANTILAG_MASK];
@@ -101,7 +108,14 @@ void antilag_rewind_all(edict_t *ent)
 		VectorCopy(who->maxs, state->hold_maxs);
 
 		//Com_Printf("seek diff %f\n", (float)state->seek - rewind_seek);
-		LerpVector(state->hist_origin[((int)rewind_seek) & ANTILAG_MASK], state->hist_origin[((int)(rewind_seek+1)) & ANTILAG_MASK], rewind_seek - ((float)(int)rewind_seek), who->s.origin);
+        vec3_t prev, next;
+        VectorCopy(state->hist_origin[(int)rewind_seek & ANTILAG_MASK], prev);
+        if (rewind_seek < 1) {
+            VectorCopy(who->s.origin, next);
+        } else {
+            VectorCopy(state->hist_origin[((int)(rewind_seek+1)) & ANTILAG_MASK], next);
+        }
+		LerpVector(prev, next, rewind_seek - ((float)(int)rewind_seek), who->s.origin);
 
 		VectorCopy(state->hist_mins[(int)rewind_seek & ANTILAG_MASK], who->mins);
 		VectorCopy(state->hist_maxs[(int)rewind_seek & ANTILAG_MASK], who->maxs);
